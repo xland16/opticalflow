@@ -1,0 +1,291 @@
+<title>Computer Vision Homework #3 -- Tom Crossland</title>
+<center><h1>CS 4501: Computer Vision<br>Homework Assignment #3</h1>
+<h2>Tom Crossland (tcc4dr)</h2><br><br></center>
+<h2>Beginning Questions</h2>
+1. <b>What is the generative process you assume underlies the distribution of the set of points?</b>
+I assume that for each cloud of points, there exists k lines of best fit in which the members of each line
+of best fit are equally likely to be on either side of the line of best fit.<br>
+<b>What are the parameters of your model that you aim to estimate?</b>
+I aim to estimate k lines of best fit among the points.  I will thus have k equations for lines and
+some data structure to indicate which points are closest to or "members of" each line.<br>
+<b>What is the hidden or missing data in this problem?</b>
+I can assume I am given how many lines I am looking for best fits among the point clouds. I wil assume this
+will be done in 2D, though the procedure can easily be extended to further dimensions.<br>
+<b>What is the E-step?</b>
+There exists k lines among the point clouds.  Group each point in space in accordance to which line it is closest to.<br>
+<b>What is the M-step?</b>
+For each line's group of points, find the line of best fit amongst the grouped points. There should be k new lines of best fits.
+Call the E-step using your new lines of best fit<br>
+<b>How do you initialize your algorithm?</b>
+Intialize k lines going through the origin with uniquely random angles made with the positive x-axis from 0 to but
+not including 180 degrees.  This will create k random yet unique lines.<br>
+<b>How would you evaluate your solution?</b>
+Keep going through the E-step and the M-step until the lines converge or do not change within a given threshold.
+However, the lines may converge to a local minuma and can get stuck there.  In addition, depending on the lines
+generated, all points might converge to one line and no points to another.  If this occurs, restart the algorithm
+with new random initialized lines.<br><br><br>
+
+2. When looking at this problem, there are numerous implied questions within it.  First, we must identify what
+constitutes similar images.  In addition, we must determine how to treat two images being compared.
+How do we turn the difference or "distance" between images into a scaler?  Additionally, how do we determine
+distances between two textures?  Here is one way of calculating the distance between two images.  Perform k-means clustering on textures on a large set of data.
+As a result, one can produce a dictionary of common textures.  Now on the two images being compared,
+compute the histogram of how many times each of the k clusters occurs in a neighborhood.  This segments each
+image based on texture. Try to match similar textures to one another amongst the two pictures being compared.
+Once the best matches are found for each segment, take a random equally sized window from each texture.  If the
+Compute SSD between the texture windows.  Do this for each "matching" texture, giving more weight to similarities
+between textures that do not occur that often in the "texture dictionary" computed before. Sum up these scalar
+values to compute the "distance" between the two points.  Therefore, this algorithm deems an image is "close"
+to another image if both contain similar less probable textures to one another.  Therefore, given
+an image as input, compute the distance between it and every image in a dataset, returning an ordered list
+of the images with the smallest distance.<br><br>
+
+<h2>Colorspaces and false-color visualizations</h2>
+
+To create a false color representation of a number between 0 and 1, I wrote a matlab function called mapToColor.
+mapToColor has one parameter, p.  p is a positive real number between 0 and 1.
+The function outputs a numerical triple [r g b].  These three numbers represent the color the input is being mapped to.
+r represents the red intensity of the color, g the green intensity, and b the blue intensity.
+These are positive real numbers between 0 and 1, increasing in color intensity with value.
+To perform this calculation, I first mapped the input p to a color in the hsv colorspace.
+hsv is made up of three numbers representing the hue, saturation, and value of the color.
+Each of these parameters are real numbers between 0 and 1.
+To get a unique color hue for a unique input, I set the hue value to the input p time .75.
+I kept the saturation and value levels at constant values of 1.
+This is turn produces bright distinct colors that could easily be indentified as distinct.
+For the hue value in the hsv colorspace, 0 corresponds to red.
+As the number increases, so does the color hue until it reaches one and wraps around to one again.
+Therefore, given constant value and saturation, two colors with hues 0 and 1 will look very similar to one another.
+To avoid this, I scaled p down by 3/4 for the hue value being mapped to.
+Therefore, all hues were in the range of red to purple instead of red to red.
+Because of the way I mapped the values to colors, lower inputs near zero mapped to a color close to red.
+In turn, inputs closer to one mapped to a color similar to purple.
+As the input value increases, the mapped color's hue increases, from red, following the color of the rainbow, until purple.
+I then converted the hsv color triple to its respective rgb triple using the provided Matlab conversion function.
+Given a value between 0 and 1, I was able to produce a stable and unique color that mapped to it in both the hsv
+and the rgb color space.<br><br>
+To test my function, I wrote a test function which would perform false color imaging on different input pictures.
+From the input image, I was able to create an intensity or grayscale image that was representitive of it.
+Therefore, each pixel in the image was now an intensity value between 0 and 1.
+For each pixel, I called my function to map its intensity value to a specific rgb color.
+I then set the pixel's rgb values to the rgb triple outputted by the color mapping function.
+As a result, given an image as input, I was able to create a new image with color corresponding to the input image's pixel intensity.
+Below are five examples of false colored images produced using my color mapping function.
+Again, red and orange values correspond to pixels with low intensity, yellow and green correspond to medium intensity,
+and blue and purple correspond to high intensity.<br>
+
+<h3>mandrill.jpg</h3>
+Original image<br>
+<img src="./TestColor/mandrill.jpg"></img><br><br>
+False colored image<br>
+<img src="./TestColor/mandrill-falsecolor.jpg"></img><br><br><br>
+
+<h3>flowers.jpg</h3>
+Original image<br>
+<img src="./TestColor/flowers.jpg"></img><br><br>
+False colored image<br>
+<img src="./TestColor/flowers-falsecolor.jpg"></img><br><br><br>
+
+<h3>halfdome.jpg</h3>
+Original image<br>
+<img src="./TestColor/halfdome.jpg"></img><br><br>
+False colored image<br>
+<img src="./TestColor/halfdome-falsecolor.jpg"></img><br><br><br>
+
+<h3>lawn.jpg</h3>
+Original image<br>
+<img src="./TestColor/lawn.jpg"></img><br><br>
+False colored image<br>
+<img src="./TestColor/lawn-falsecolor.jpg"></img><br><br><br>
+
+<h3>bioshock.jpg</h3>
+Original image<br>
+<img src="./TestColor/bioshock.jpg"></img><br><br>
+False colored image<br>
+<img src="./TestColor/bioshock-falsecolor.jpg"></img><br><br><br>
+
+<h2>Optical flow</h2>
+To detect optical flow, I wrote a matlab function called opticalFlow.m.
+This function takes 10 parameters: dir, fStart, fNum, sigma, nSize, spSize, tau, magTau, viewOpt, and record.
+dir is the name of the subfolder in which the frames of the video being used to detect optical flow in are stored.
+For simplicity's sake, it is assumed that this subfolder has a subfolder named 'output' to which frames with
+motion vectors overlayed from the video are saved to.  In addition, it can be assumed that each directory contains
+sequentially numbered pictures starting at 1.  These represent the frames of the video being looked at.
+Each file name is 8 digits long and is a '.jpg' image for ease to access.  fStart is the frame number you want to
+start detecting optical flow at. fNum is the frame number you want to start detecting optical flow at.
+fStart and fNum are thus both positive integers and fStart < fNum.
+Sigma is the width of the Gaussian blur being used. For reasons to be discussed later, I assume that sigma would be a number greater than or equal to zero.
+nSize is the size of the neighborhood being considered when detecting optical flow. nSize is a positive integer.
+At a pixel at location (i,j), the resulting neighborhood is a square stretching from points (i-nSize,j-nSize) to
+(i+nSize,j+nSize).  In turn, without running into a border, each neighborhood contains (2*nSize+1)^2 pixels.
+spSize represents the spacing for determining the optical flow in the frames.  spSize is a positive integer.
+At every spSize-th pixel, a motion vector is computed or attempts to be computed.
+tau represents the threshold for determining if there exists a motion vector at a particular point. If the pixel's
+corresponding covariance matrix has a determinant less than tau, no solution exists.
+viewOpt determines how you want to visualize the arrows of the motion vectors in each frame.
+viewOpt has three possible values: 1, 2, and 3.
+When viewOpt = 1, the motion vectors are all colored green, showing the general optical flow.
+When viewOpt = 2, the motion vectors are colored based on error in the optical flow calculation.
+When viewOpt = 3, the motion vectors are colored based on stability in the optical flow calculation.
+Finally, record determines whether or not you want to record a video illustrating the optical flow on the frames.
+When record = 1, a video is record and saved.  Else, it is not.<br><br>
+When determining optical flow amongst a set of frames from a video, I made some assumptions.
+First, I assumed that the frames would always be read in order.
+Therefore, for the i-th frame, the next frame being read and compared would be frame i+1.
+First, the program reads the first frame passed to the function and said that it would be the next frame it processes.
+Because we assume that intensity and lighting are constant for this optical flow algorithm, frames being read in
+should be converted to intensity or grayscale images due to the ease of use and comparison of pixels represented
+by one value between 0 and 1 than by 3 values between 0 and 255.
+Then, the program goes into a loop processing frame by frame.
+Inside the loop, the program sets the current frame being processed to the former next frame.
+It then updates the next frame to process by reading in the next frame in sequence.
+To find the temporal gradiant of the frame, I simply subtracted the current frame's intensity values from
+the next frame's intensity values.
+This is simple finite differencing. The rate of change of the intensity at one pixel as a function of time
+is simply the difference between its value at time t+1 (the next frame) and its value at time t (the current frame).
+This definition won't let you compute dI/dt at the last frame. Therefore, when processing frames, we must ignore the last frame.
+Next the program computes the spatial gradient of each video frame by convolving it with partial derivatives of a Gaussian in the x- and y-dimensions.
+This was extremely similar to my implementation in Assignment 1. For convolution, I used FFT's to speed it up using code
+I wrote in Assignment 2.  If there are any questions in how these aspects were implemented, one should consult
+by write up files for Assignments 1 and 2.<br><br>
+At each pixel being looked at, I created an nSize neighborhood as stated before.
+If the neighborhood exceeded the edges of the frame, the neighborhood was cropped so it could fit without access errors.
+For each pixel in the neighborhood found, I made a resulting A and b matrix.
+The A matrix was an n by 2 matrix where n was the number of pixels in the given neighborhood.  The first column of A
+was the spatial gradiant values of each pixel in the x direction.
+The second column of A was the spatial gradiant of each pixel in the y direction.
+b was an n by 1 matrix consisting of the temporal gradiant of each respective pixel in the neighborhood.
+Assuming there is no change in intensity between frames, Av + b = 0 where v represents the motion vector
+of the particular point being looked at.  Using linear algebra, one can solve the equation for v given A and b.
+However, the system does not have a solution when the covariance matrix (A'A) is singular.
+Therefore, if the determinant of the covariance matrix is less than tau, the program assumes there is no solution
+for the motion vector and it skips over that point while looking for optical flow.  Else, the program computes the motion vector.
+<br><br>
+At this time, the program also computes the relative error and stability of each point used to determine optical flow if
+there exists a motion vector at a given point.  For relative error, I calculated the 'real' solutions for the change in
+intensity given A, v, and b.  Thus, Av-b = [x y] where x and y equal the change in intensity in the x and y directions.
+I multiplied this resulting matrix by its transpose to get all positive numbers and summed up all of the elements in it.
+This gave a relative number representing how much error was there in calculating the optical flow at a particular pixel.
+Once all error values were determined, I divided all of them by the highest error value obtained.
+This normalized all of the answers, putting them between 0 and 1.  
+Relative stability is proportional to the second largest eigenvalue of the covariance matrix of the point being looked at
+when determining optical flow. I thus found and stored this eigenvalue at every necessary point. 
+This gave a relative number representing how stable it was calculating the optical flow at a particular pixel.
+Once all stability values were determined, I divided all of them by the highest stability value obtained.
+This normalized all of the answers, putting them between 0 and 1.
+<br><br>
+To avoid cluttering and unreadable results, I decided to only draw arrows representing optical flow whose magnitudes
+were greater than magTau.  The program drew each noteworthy arrow after they were all normalized and scaled to certain lengths
+due to the ease of reading results.  The colors of the arrows represented what the user wanted to visualize.
+When viewOpt = 1, the motion vectors are all colored green, showing the general optical flow.
+When viewOpt = 2, the motion vectors are colored based on error in the optical flow calculation.
+When viewOpt = 3, the motion vectors are colored based on stability in the optical flow calculation.
+For the latter two options, the pixel's respective values for error and stability were mapped to a color using my
+matlab function created earlier in the assignment.  This process repeats for each frame until the second to last specified frame.
+Below are examples of optical flow across the video frames. For this and all following videos,
+I used a sigma blur value of 1, neighborhood size of 20, spacing size of 20, tau threshold for the determinant of 0.01, 
+magTau threshold for the magnitude of the motion vectors of 1 and record on.
+<br><br>
+
+<h2>hand.avi</h2>
+<h3>Frames 90-150, viewOpt = 1 (Normal)</h2>
+<a href="./hand/hand-1.avi">Click here to view</a>
+<h3>Frames 1-269, viewOpt = 2 (Error): FULL OPTIMAL FLOW</h2>
+<a href="./hand/hand-2.avi">Click here to view. Note: This is of the entire video sequence</a>
+<h3>Frames 90-150, viewOpt = 3 (Stability)</h2>
+<a href="./hand/hand-3.avi">Click here to view</a><br><br>
+
+The video of the hand has a static background of a bookcase.  Within a couple of frames, a hand comes down
+from the top right of the frame and moves slowly down.  As seen in my videos, I was able to detect the optical flow
+across this video.  The motion vectors were all near the hand and pointed in the direction of motion.  This
+strongly indicates that the hand was moving in the video with nothing else.  In addition, the program picked up
+on the shadow of the hand, indicating its movement.  There were some anomalies where arrows appeared where there
+was no movement.  This could have been because of a slight light intensity change or noise in the scene from frame to frame.
+This was greatly expected since there was little intensity change between frames and the movement in the video
+trying to be detected was a simple translation.  There were some interesting finds related to which vectors showed up
+near the hand.  There seemed to be a lack of vectors on the forehand of the subject's hand throughout the video.
+This could be because of lack of variation in that patch of skin.  Looking at the forearm, there are little to no
+unique marks the program could use to determine translated motion.  However, the program could do this on other parts
+of the arm with somewhat unique markings such as lines on the fingers and palm of the hand.  This increase
+in texture seems to help identify motion.
+In addition, one can also look at the error visualization of the optical flow.  Arrows on the hand and arm tended
+to be red.  This corresponds with a low error value.  Arrows close to but not near the arm and those on the fingertips
+tended to be of a "higher" associated color.  This indicates that there was more error in determining the motion
+vectors in places where it was harder to find unique places to track motion.  A similar phenomenon occurred for 
+the stability visulation, indicating a similar correlation.
+
+<h2>book.avi</h2>
+<h3>Frames 130-190, viewOpt = 1 (Normal)</h2>
+<a href="./book/book-1.avi">Click here to view</a><br><br>
+
+The video of the book has a static background of a bookcase.  Within a couple of frames, a hand comes down
+from the top right of the frame and moves slowly down holding a book with a cactus on it. 
+As seen in my videos, I was able to detect the optical flow
+across this video.  The motion vectors were all near the hand and book and pointed in the direction of motion.  This
+strongly indicates that the hand was moving with the book in the video with nothing else.  In addition, the program picked up
+on the shadow of the hand and book, indicating its movement.  Compared to the hand video, the book video did
+much better at displaying noteworthy motion vectors.  The book moving in the video had many unique points on it - the
+picture of the cactus and text provided many unique points for the program to adequately detect translated motion.
+In my visualization, one can see how in almost every frame, the book is almost entirely covered in the correct
+motion vectors with no "bald" patches.
+
+<h2>flowers.avi</h2>
+<h3>Frames 50-100, viewOpt = 2 (Error)</h2>
+<a href="./flowers/flowers-2.avi">Click here to view</a><br><br>
+The video of the flowers shows a camera itself moving around a scene.  However, the program interprets this as if
+the camera is standing still and the scene is moving around.  Therefore, the program produced a vector field with
+vectors pointing opposite of the camera's movement.  In almost every frame, the vector field is displayed across
+the whole image.  This indicates that the whole scene was moving.  However, when there was a patch of pixels with little
+variation, no arrows would be displayed.  This is again due to the program not having enough unique points to
+adequately detect translated motion.
+
+<h2>traffic.avi</h2>
+<h3>Frames 20-80, viewOpt = 2 (Error)</h2>
+<a href="./traffic/traffic-2.avi">Click here to view</a><br><br>
+The video of the traffic shows a camera attached to a moving car and observing what it sees.  However, the program interprets this as if
+the camera is standing still and the scene is moving around.  Therefore, the program produced a vector field with
+vectors pointing opposite of the car's movement.  In almost every frame, the vector field is displayed across
+the foreground.  This indicates that the foreground was moving.  However due to perspective, smaller items farther away did not display
+too many arrows.  This is because the deeper one goes in a field, the smaller the apparent change in movement is.
+Therefore, something moving at the same velocity closer to the camera will be more strongly detected than something
+further away moving at the same rate.  However, when there was a patch of pixels with little
+variation, no arrows would be displayed.  Some examples of this included patches of the sky and road.  
+This is again due to the program not having enough unique points to
+adequately detect translated motion.
+
+<h2>Neighborhood Analysis</h2>
+First image (./hand/00000130.jpg)<br>
+<img src="./Neighborhood/00000001.jpg"></img><br><br>
+Second image (./hand/00000135.jpg)<br>
+<img src="./Neighborhood/00000002.jpg"></img><br><br><br>
+For the neighborhood analysis, I chose frames 130 and 135 from the hand video.  I was able to adequately detect
+optical flow on the hand data set.  The motion of the hand was a simple translation.  For these reasons, I chose
+my two test images from the hand data set.  I picked the first image since it was one of the first images in the video
+in which the complete hand appears.  I chose the second image because it illustrated some movement between it and the previous image.
+This movement was noticeable and was not necessarily too small to tell by the human eye.  I used these two images
+to produce motion vectors given different neighbor sizes.  Here are the results with stability being visualized.<br>
+<br>
+<h2>nSize = 5</h2>
+<img src="./Neighborhood/output/stab-5.png"></img>
+<h2>nSize = 10</h2>
+<img src="./Neighborhood/output/stab-10.png"></img>
+<h2>nSize = 20</h2>
+<img src="./Neighborhood/output/stab-20.png"></img>
+<h2>nSize = 35</h2>
+<img src="./Neighborhood/output/stab-35.png"></img>
+<h2>nSize = 50</h2>
+<img src="./Neighborhood/output/stab-50.png"></img>
+<h2>nSize = 100</h2>
+<img src="./Neighborhood/output/stab-100.png"></img><br><br>
+
+When you increase the neighborhood size, the more likely you are to detect motion vectors in the optical flow.
+With a smaller neighborhood size, the object moving might be translated outside of the neighborhood window.
+The program could not identify that said object is moving and thus would lose that data.  However, a larger neighborhood
+size allows for more rapid and further translation to be detected.  However, as the neighborhood size increases,
+the stability of the motion vectors decreases.  This can be seen in the difference of coloring in the arrows
+among the pictures with higher neighborhood sizes.  The program is less sure where a particular object has moved
+if it has to search for it in a larger neighborhood.  Therefore, there exists an optimal neighborhood size which
+can adequately detect translation of unique objects stably.
+
+<br><br>
+On my honor as a student, I did not give or received any unauthorized aid on this assignment<br>-Tom Crossland
